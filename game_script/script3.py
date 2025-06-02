@@ -1,6 +1,10 @@
 import pygame
 import sys
 import time
+import sys
+import os
+import subprocess  
+
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -36,7 +40,7 @@ puzzles_rooms = [
         ]
     },
     {
-        'background': pygame.Surface((WIDTH, HEIGHT)), 
+        'background': pygame.Surface((WIDTH, HEIGHT)),
         'hotspots': [
             {'rect': pygame.Rect(300, 200, 50, 50), 'question': "question f", 'answer': "f", 'fragment': 'G'},
             {'rect': pygame.Rect(500, 100, 50, 50), 'question': "question g", 'answer': "g", 'fragment': 'E'},
@@ -65,6 +69,8 @@ user_text = ''
 current_hotspot = None
 message = ''
 message_time = 0
+feedback_active = False 
+
 
 def draw_text(surface, text, pos, color=(0,0,0)):
     rendered = font.render(text, True, color)
@@ -81,7 +87,7 @@ def game_over():
 
 
 def main():
-    global input_active, user_text, current_hotspot, message, message_time, current_room, player_rect
+    global input_active, user_text, current_hotspot, message, message_time, feedback_active, current_room, player_rect
     while True:
         now = time.time()
         for event in pygame.event.get():
@@ -90,13 +96,17 @@ def main():
                 sys.exit()
             if input_active and event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+
                     correct = user_text.strip().lower() == current_hotspot['answer']
                     if correct:
                         message = f"good {current_hotspot['fragment']}"
-                        puzzles_rooms[current_room]['hotspots'].remove(current_hotspot)
                     else:
                         message = "wrong"
                     message_time = now
+                    feedback_active = True
+
+                    if correct:
+                        puzzles_rooms[current_room]['hotspots'].remove(current_hotspot)
                     user_text = ''
                     input_active = False
                     current_hotspot = None
@@ -106,7 +116,7 @@ def main():
                     user_text += event.unicode
 
         keys = pygame.key.get_pressed()
-        if not input_active:
+        if not input_active and not feedback_active:
             if keys[pygame.K_LEFT]: player_rect.x -= player_speed
             if keys[pygame.K_RIGHT]: player_rect.x += player_speed
             if keys[pygame.K_UP]: player_rect.y -= player_speed
@@ -117,7 +127,7 @@ def main():
         room = puzzles_rooms[current_room]
         screen.blit(room['background'], (0, 0))
 
-
+      
         for trap in room['traps']:
             pygame.draw.rect(screen, (0, 0, 0), trap)
             if player_rect.colliderect(trap):
@@ -130,7 +140,7 @@ def main():
         screen.blit(player_img, player_rect)
 
 
-        if not input_active and not message and room['hotspots']:
+        if not input_active and not feedback_active and room['hotspots']:
             for spot in room['hotspots']:
                 if player_rect.colliderect(spot['rect']):
                     input_active = True
@@ -139,16 +149,21 @@ def main():
                     message_time = now
                     break
 
-        if message and now - message_time < 5:
+
+        if input_active:
             pygame.draw.rect(screen, (255, 255, 255), (50, 400, 700, 150))
             draw_text(screen, message, (60, 420))
-            if input_active:
-                draw_text(screen, user_text, (60, 460))
-        elif message and now - message_time >= 5:
-            message = ''
+            draw_text(screen, user_text, (60, 460))
+        elif feedback_active:
+            if now - message_time < 3:  
+                pygame.draw.rect(screen, (255, 255, 255), (50, 400, 700, 150))
+                draw_text(screen, message, (60, 420))
+            else:
+                feedback_active = False
+                message = ''
 
 
-        if not room['hotspots']:
+        if not room['hotspots'] and not input_active and not feedback_active:
             if current_room < len(puzzles_rooms) - 1:
                 current_room += 1
                 player_rect.topleft = (50, 50)
