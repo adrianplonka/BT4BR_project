@@ -6,14 +6,16 @@ import subprocess
 
 # using pygame to initialize the game
 pygame.init()
-WIDTH, HEIGHT = 1300, 700
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+info = pygame.display.Info()
+#WIDTH, HEIGHT = 1300, 900
+WIDTH, HEIGHT = info.current_w, info.current_h
+screen = pygame.display.set_mode((WIDTH, HEIGHT))#, pygame.FULLSCREEN
 pygame.display.set_caption("Biologiczny Escape Room")
 font = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
 
 def load_image(path, scale=None):
-    """ function for loading all the graphics"""
+    """function for loading all the graphics"""
     img = pygame.image.load(path).convert_alpha()
     if scale:
         img = pygame.transform.scale(img, scale)
@@ -27,17 +29,36 @@ player_speed = 4
 
 ################## LOADING GRAPHICS FOR BACKROUND ############################
 
-room00 = load_image("images\\room1.jpg", (WIDTH, HEIGHT))
-room0 = load_image("images\\room1.jpg", (WIDTH, HEIGHT))
-room1 = load_image("images\\room1.jpg", (WIDTH, HEIGHT))  
-room2 = load_image("images\\room2.png", (WIDTH, HEIGHT))
-room3 = load_image("images\\room3.png", (WIDTH, HEIGHT))
+tutorial = load_image("images\\tutorial.png", (WIDTH, HEIGHT))
+tutorial_1 = load_image("images\\tutorial_1.png", (WIDTH, HEIGHT))
+room1 = load_image("images\\image1.png", (WIDTH, HEIGHT))  
+room2 = load_image("images\\image0.png", (WIDTH, HEIGHT))
+room3 = load_image("images\\image2.png", (WIDTH, HEIGHT))
 
 
 ##############################################################################
 ################## LOADING GRAPHICS FOR HOTSPOTS #############################
 
-item1 = load_image("images\\item1.png", (60, 60))
+### room1 ###
+laptop_1=load_image("images\\laptop_1.png", (100, 100))
+laptop_2=load_image("images\\laptop_2.png", (100, 100))
+laptop_3=load_image("images\\laptop_3.png", (100, 100))
+laptop_4=load_image("images\\laptop_4.png", (100, 100))
+laptop_5=load_image("images\\laptop_5.png", (100, 100))
+
+### room2 ###
+lab_1 = load_image("images\\lab_1.png", (100, 100))
+lab_2 = load_image("images\\lab_2.png", (100, 100))
+lab_3 = load_image("images\\lab_3.png", (100, 100))
+lab_4 = load_image("images\\lab_4.png", (150, 150))
+lab_5 = load_image("images\\lab_5.png", (100, 100))
+### room3 ###
+board_1 = load_image("images\\board_1.png", (100, 100))
+board_2 = load_image("images\\board_2.png", (100, 100))
+board_3 = load_image("images\\board_3.png", (100, 100))
+board_4 = load_image("images\\board_4.png", (100, 100))
+board_5 = load_image("images\\board_5.png", (100, 100))
+
 
 
 ##############################################################################
@@ -54,45 +75,46 @@ puzzles_rooms = [
     {
         'background': room1,
         'hotspots': [
-            {'rect': pygame.Rect(150, 150, 50, 50), 'image': item1, 'question': "question a", 'answer': "a", 'fragment': 'C', 'open_terminal': True},
-            {'rect': pygame.Rect(300, 150, 50, 50), 'image': item1, 'question': "question b", 'answer': "b", 'fragment': 'O'},
-            {'rect': pygame.Rect(450, 150, 50, 50), 'image': item1, 'question': "question c", 'answer': "c", 'fragment': 'M'},
-            {'rect': pygame.Rect(150, 300, 50, 50), 'image': item1, 'question': "question d", 'answer': "d", 'fragment': 'P'},
-            {'rect': pygame.Rect(300, 300, 50, 50), 'image': item1, 'question': "question e", 'answer': "e", 'fragment': 'H'}
+            {'rect': pygame.Rect(350, 180, 100, 100), 'image': laptop_1, 'question': "Co jest podstawową jednostką budulcową?", 'answer': "komórka", 'fragment': 'C', 'open_terminal': True},
+            {'rect': pygame.Rect(700, 400, 50, 50), 'image': laptop_2, 'question': "A lab notebook is vital for ensuring traceability and…?", 'answer': "reproducibility", 'fragment': 'O'},
+            {'rect': pygame.Rect(900, 450, 50, 50), 'image': laptop_3, 'question': "Która organella to elektrownia komórki?", 'answer': "mitochondrium", 'fragment': 'M', 'open_terminal': True},
+            {'rect': pygame.Rect(800, 200, 80, 80), 'image': laptop_4, 'question': "True or False (type T or F) Jupyter Notebooks support multiple programming languages like Python and R.", 'answer': "T", 'fragment': 'P'},
+            {'rect': pygame.Rect(350, 300, 100, 100), 'image': laptop_5, 'question': "Jakiego typu wiązanie między cząsteczkami wody?", 'answer': "wodorowe", 'fragment': 'H', 'open_terminal': True}
         ],
         'traps': [
             {  # vertical moving trap
-                'rect': pygame.Rect(400, 100, 50, 50), 'image' : trap1,
+                'rect': pygame.Rect(500, 300, 50, 50), 'image' : trap1,
                 'vel': [0, 2], 
-                'min': 100,
-                'max': 400,
+                'min': 200,
+                'max': 500,
                 'axis': 'vertical'
             },
             {  # horizontal moving trap
-                'rect': pygame.Rect(650, 450, 50, 50), 'image' : trap1,
+                'rect': pygame.Rect(600, 300, 50, 50), 'image' : trap1,
                 'vel': [2, 0], 
-                'min': 500,
-                'max': 700,
+                'min': 600,
+                'max': 850,
                 'axis': 'horizontal'
             }
         ],
-        'code': "CHOMP",
+        'code': "CHOMP", # space for code
         'fragments': ['_' for _ in "CHOMP"]
     },
     {
         'background': room2,
         'hotspots': [
-            {'rect': pygame.Rect(300, 200, 50, 50), 'image': item1, 'question': "question f", 'answer': "f", 'fragment': 'G'},
-            {'rect': pygame.Rect(500, 100, 50, 50), 'image': item1, 'question': "question g", 'answer': "g", 'fragment': 'E'},
-            {'rect': pygame.Rect(200, 350, 50, 50), 'image': item1, 'question': "question h", 'answer': "h", 'fragment': 'N'},
-            {'rect': pygame.Rect(550, 350, 50, 50), 'image': item1, 'question': "question i", 'answer': "i", 'fragment': 'E'}
+            {'rect': pygame.Rect(600, 110, 50, 50), 'image': lab_1, 'question': "question a", 'answer': "a", 'fragment': 'G'},
+            {'rect': pygame.Rect(200, 425, 50, 50), 'image': lab_2, 'question': "question b", 'answer': "b", 'fragment': 'E'},
+            {'rect': pygame.Rect(800, 400, 50, 50), 'image': lab_3, 'question': "question c", 'answer': "c", 'fragment': 'N'},
+            {'rect': pygame.Rect(1100, 500, 50, 50), 'image': lab_4, 'question': "question d", 'answer': "d", 'fragment': 'E'},
+            {'rect': pygame.Rect(450, 275, 50, 50), 'image': lab_5, 'question': "question e", 'answer': "e", 'fragment': 'E'}
         ],
         'traps': [
             {  # vertical moving trap
-                'rect': pygame.Rect(100, 500, 50, 50),'image' : trap1,
+                'rect': pygame.Rect(300, 500, 50, 50),'image' : trap1,
                 'vel': [0, -2],
-                'min': 100,
-                'max': 500,
+                'min': 300,
+                'max': 600,
                 'axis': 'vertical'
             },
             {  # horizontal moving trap
@@ -103,13 +125,18 @@ puzzles_rooms = [
                 'axis': 'horizontal'
             }
         ],
-        'code': "GENE",
-        'fragments': ['_' for _ in "GENE"]
+        'code': "GENEE",
+        'fragments': ['_' for _ in "GENEE"]
     },
     {
         'background': room3,
         'hotspots': [
-            {'rect': pygame.Rect(350, 300, 50, 50), 'image': item1, 'question': "question j", 'answer': "j", 'fragment': 'A'}
+            {'rect': pygame.Rect(1000, 100, 50, 50), 'image': board_1, 'question': "Data driven research without a hypothesis can lead to a costly fishing…", 'answer': "expedition", 'fragment': 'A'},
+            {'rect': pygame.Rect(280, 150, 50, 50), 'image': board_2, 'question': "True or False (type T or F) Correlation always implies causation.", 'answer': "f", 'fragment': 'A'},
+            {'rect': pygame.Rect(600, 300, 50, 50), 'image': board_3, 'question': "Which process involves conducting a new study with new data to confirm the generality of the original results? ", 'answer': "replication", 'fragment': 'A'},
+            {'rect': pygame.Rect(350, 500, 50, 50), 'image': board_4, 'question': "Quarto combines features of RMarkdown and Jupyter…", 'answer': "notebooks", 'fragment': 'A'},
+            {'rect': pygame.Rect(800, 450, 50, 50), 'image': board_5, 'question': "UMAP and t-SNE are nonlinear graph-based dimension reduction….", 'answer': "algorithms", 'fragment': 'A'},
+            
         ],
         'traps': [
             {  # vertical moving trap
@@ -118,14 +145,21 @@ puzzles_rooms = [
                 'min': 200,
                 'max': 450,
                 'axis': 'vertical'
+            },
+            {  # horizontal moving trap
+                'rect': pygame.Rect(700, 300, 50, 50),'image' : trap1,
+                'vel': [2, 0],
+                'min': 700,
+                'max': 1100,
+                'axis': 'horizontal'
             }
         ],
-        'code': "A",
-        'fragments': ['_' for _ in "A"]
+        'code': "AAAAA",
+        'fragments': ['_' for _ in "AAAAA"]
     }
 ]
 
-current_room = 2
+current_room = 1
 input_active = False
 pass_active = False
 user_text = ''
@@ -136,7 +170,7 @@ message_time = 0
 feedback_active = False
 
 # Question pop up
-pass_rect = pygame.Rect(WIDTH - 100, HEIGHT // 2 - 25, 50, 50)
+pass_rect = pygame.Rect(WIDTH - 100, HEIGHT//2 , 50, 50)
 
 # Drawing text
 def draw_text(surface, text, pos, color=(0,0,0)):
@@ -160,7 +194,7 @@ def update_traps(traps):
 def game_over():
     """ function to end the game"""
     screen.fill((0,0,0))
-    draw_text(screen, "Przegrałeś! Koniec gry.", (260,280),(255,0,0))
+    draw_text(screen, "You published your paper in predatory journal. Game over. ", (WIDTH//2 - 300,HEIGHT//2),(255,0,0))
     pygame.display.flip(); pygame.time.delay(3000); pygame.quit(); sys.exit()
 
 # Main game loop
@@ -206,27 +240,25 @@ def main():
                         if pass_active: pass_text += e.unicode
 
         if current_room == -2:
-            screen.blit(room00, (0,0))
-            draw_text(screen, "Witamy w grze! Naciśnij Enter, aby kontynuować.", (200, HEIGHT//2), (255,255,255))
+            screen.blit(tutorial, (0,0))
             pygame.display.flip()
             clock.tick(60)
             continue
         elif current_room == -1:
-            screen.blit(room0, (0,0))
-            draw_text(screen, "To jest drugi ekran. Naciśnij Enter, aby rozpocząć.", (200, HEIGHT//2), (255,255,255))
+            screen.blit(tutorial_1, (0,0))
             pygame.display.flip()
             clock.tick(60)
             continue
         
-        if not input_active and not feedback_active and not pass_active:
+        if not input_active and not pass_active:
             k = pygame.key.get_pressed()
             if k[pygame.K_LEFT]: player_rect.x -= player_speed
             if k[pygame.K_RIGHT]: player_rect.x += player_speed
             if k[pygame.K_UP]: player_rect.y -= player_speed
             if k[pygame.K_DOWN]: player_rect.y += player_speed
-            # Obsługa wejścia w pole hasła
             if k[pygame.K_RETURN] and pass_rect.colliderect(player_rect) and all(ch != '_' for ch in puzzles_rooms[current_room]['fragments']):
-                pass_active = True; pass_text = ''
+                pass_active = True
+                pass_text = ''
         player_rect.clamp_ip(screen.get_rect())
 
         room = puzzles_rooms[current_room]
@@ -278,22 +310,21 @@ def main():
 
         # question, answer, feedback pop up
         if input_active:
-            pygame.draw.rect(screen, (255,255,255), (50,400,700,150))
-            draw_text(screen, message, (60,420)); draw_text(screen, user_text, (60,460))
+            pygame.draw.rect(screen, (255,255,255), (30,500,1300,150))
+            draw_text(screen, message, (40,520)); draw_text(screen, user_text, (40,560))
         elif feedback_active and now - message_time < 3:
-            pygame.draw.rect(screen, (255,255,255), (50,400,700,150)); draw_text(screen, message, (60,420))
+            pygame.draw.rect(screen, (255,255,255), (30,500,1300,150)); draw_text(screen, message, (40,520))
         elif feedback_active and now - message_time >= 3:
             feedback_active = False; message = ''
 
         if pass_active:
             pygame.draw.rect(screen, (255,255,255), (50,400,700,150))
             draw_text(screen, "Insert password", (60,420)); draw_text(screen, pass_text, (60,460))
-
+        
         # end game if the last room left
         if current_room >= len(puzzles_rooms):
             screen.fill((0,0,0)); draw_text(screen, "Congratulations, you've succesfully published your first paper!", (250,280),(255,255,255)); pygame.display.flip(); pygame.time.delay(3000); pygame.quit(); sys.exit()
 
         pygame.display.flip(); clock.tick(60)
-
 if __name__=='__main__': 
     main()
