@@ -30,15 +30,5 @@ All educational content has been written with clarity and accessibility in mind,
 
 ## Project Structure
 
+<pre> project/ ├── R/ # R scripts for data visualization and plotting │ └── plots.R # Generates figures based on in-game progress ├── game/ # Game logic and core mechanics │ ├── assets/ # Custom-designed graphics (created with GIMP & Inkscape) │ ├── questions/ # Room-specific quiz questions │ └── escape_game.py # Main Python script running the game ├── analysis/ # R Markdown files and analysis outputs │ └── analysis.Rmd # Combines plots and explanations for data interpretation ├── README.md # Project documentation </pre>
 
-project/
-├── R/                      # R scripts for data visualization and analysis
-│   └── plots.R            # Script generating plots (e.g., barplots, pie charts)
-├── game/                  # Main game logic and resources
-│   ├── assets/            # Custom-made graphics (created in GIMP/Inkscape)
-│   ├── questions/         # Question bank for each room
-│   └── escape_game.py     # Core Python code for game logic
-├── README.md              # Project overview and documentation
-├── analysis/              # Placeholder for analysis output and insights
-│   └── analysis.Rmd       # R Markdown file with embedded explanations and plots
-├── .git/                  # Git metadata (for version control)
