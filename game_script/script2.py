@@ -9,13 +9,14 @@ pygame.display.set_caption("title")
 font = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
 
-player_img = pygame.image.load("zzzplayer1.png").convert_alpha()  
+
+player_img = pygame.image.load("zzzplayer1.png").convert_alpha() 
 player_img = pygame.transform.scale(player_img, (40, 40)) 
 player_rect = player_img.get_rect(topleft=(50, 50))
 player_speed = 4
 
 
-room1_bg = pygame.image.load("zzzbackground.jpg").convert()  
+room1_bg = pygame.image.load("zzzbackground.jpg").convert() 
 room1_bg = pygame.transform.scale(room1_bg, (WIDTH, HEIGHT))
 
 
@@ -28,21 +29,32 @@ puzzles_rooms = [
             {'rect': pygame.Rect(450, 200, 50, 50), 'question': "question c", 'answer': "c", 'fragment': 'M'},
             {'rect': pygame.Rect(600, 250, 50, 50), 'question': "question d", 'answer': "d", 'fragment': 'P'},
             {'rect': pygame.Rect(150, 400, 50, 50), 'question': "question e", 'answer': "e", 'fragment': 'H'}
+        ],
+        'traps': [
+            pygame.Rect(400, 100, 50, 50),
+            pygame.Rect(650, 450, 50, 50)
         ]
     },
     {
-        'background': pygame.Surface((WIDTH, HEIGHT)),  
+        'background': pygame.Surface((WIDTH, HEIGHT)), 
         'hotspots': [
             {'rect': pygame.Rect(300, 200, 50, 50), 'question': "question f", 'answer': "f", 'fragment': 'G'},
             {'rect': pygame.Rect(500, 100, 50, 50), 'question': "question g", 'answer': "g", 'fragment': 'E'},
             {'rect': pygame.Rect(200, 350, 50, 50), 'question': "question h", 'answer': "h", 'fragment': 'N'},
-            {'rect': pygame.Rect(550, 350, 50, 50), 'question': "question j", 'answer': "j", 'fragment': 'E'}
+            {'rect': pygame.Rect(550, 350, 50, 50), 'question': "question i", 'answer': "i", 'fragment': 'E'}
+        ],
+        'traps': [
+            pygame.Rect(100, 500, 50, 50),
+            pygame.Rect(700, 50, 50, 50)
         ]
     },
     {
-        'background': pygame.Surface((WIDTH, HEIGHT)),  
+        'background': pygame.Surface((WIDTH, HEIGHT)),
         'hotspots': [
-            {'rect': pygame.Rect(350, 300, 50, 50), 'question': "question k", 'answer': "k", 'fragment': ''}
+            {'rect': pygame.Rect(350, 300, 50, 50), 'question': "question j", 'answer': "j", 'fragment': ''}
+        ],
+        'traps': [
+            pygame.Rect(400, 400, 50, 50)
         ]
     }
 ]
@@ -54,10 +66,18 @@ current_hotspot = None
 message = ''
 message_time = 0
 
-
 def draw_text(surface, text, pos, color=(0,0,0)):
     rendered = font.render(text, True, color)
     surface.blit(rendered, pos)
+
+
+def game_over():
+    screen.fill((0, 0, 0))
+    draw_text(screen, "game over", (260, 280), (255, 0, 0))
+    pygame.display.flip()
+    pygame.time.delay(3000)
+    pygame.quit()
+    sys.exit()
 
 
 def main():
@@ -72,10 +92,10 @@ def main():
                 if event.key == pygame.K_RETURN:
                     correct = user_text.strip().lower() == current_hotspot['answer']
                     if correct:
-                        message = f"Good {current_hotspot['fragment']}"
+                        message = f"good {current_hotspot['fragment']}"
                         puzzles_rooms[current_room]['hotspots'].remove(current_hotspot)
                     else:
-                        message = "Wrong"
+                        message = "wrong"
                     message_time = now
                     user_text = ''
                     input_active = False
@@ -95,13 +115,17 @@ def main():
         player_rect.clamp_ip(screen.get_rect())
 
         room = puzzles_rooms[current_room]
-
         screen.blit(room['background'], (0, 0))
+
+
+        for trap in room['traps']:
+            pygame.draw.rect(screen, (0, 0, 0), trap)
+            if player_rect.colliderect(trap):
+                game_over()
 
 
         for spot in room['hotspots']:
             pygame.draw.rect(screen, (255, 100, 100), spot['rect'])
-
 
         screen.blit(player_img, player_rect)
 
@@ -122,6 +146,7 @@ def main():
                 draw_text(screen, user_text, (60, 460))
         elif message and now - message_time >= 5:
             message = ''
+
 
         if not room['hotspots']:
             if current_room < len(puzzles_rooms) - 1:
