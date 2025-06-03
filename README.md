@@ -16,7 +16,7 @@ Questions have been designed with both **challenge and reinforcement** in mind. 
 
 ## Visualization & analysis
 
-Although the core game is implemented in Python, a companion set of **R-based visualizations** ____________. These visualizations aim to identify patterns in response behavior, highlighting which concepts may require clearer framing or improved instructional scaffolding. _______________________
+For the purposes of the game, plots were generated in R. The entire Quarto document, including comments, is included in the file named "visualization".
 
 ##  Development notes
 
