@@ -36,3 +36,8 @@ All educational content has been written with clarity and accessibility in mind,
 ├── BT4BR_project.tar # Compressed full game directory 
 ├── README.md # Project description and documentation 
 ├── game_playthrough.zip # Gameplay video </pre>
+
+## References
+- https://bioconductor.org
+- pygame 2.6.1
+
