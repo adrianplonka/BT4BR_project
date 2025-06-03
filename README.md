@@ -30,5 +30,10 @@ All educational content has been written with clarity and accessibility in mind,
 
 ## Project Structure
 
-<pre> project/ ├── R/ # R scripts for data visualization and plotting │ └── plots.R # Generates figures based on in-game progress ├── game/ # Game logic and core mechanics │ ├── assets/ # Custom-designed graphics (created with GIMP & Inkscape) │ ├── questions/ # Room-specific quiz questions │ └── escape_game.py # Main Python script running the game ├── analysis/ # R Markdown files and analysis outputs │ └── analysis.Rmd # Combines plots and explanations for data interpretation ├── README.md # Project documentation </pre>
-
+<pre> BT4BR_project/ ├── game.script/ # Final game builds 
+│ ├── final_linux.py │ └── final_windows.py 
+├── images/ # All custom illustrations and graphics 
+├── other_files/ # Supplementary project files
+├── BT4BR_project.tar # Compressed full game directory 
+├── README.md # Project description and documentation 
+├── game_playthrough.zip # Gameplay video </pre>
