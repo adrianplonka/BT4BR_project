@@ -1,0 +1,192 @@
+---
+title: "final_project_BT4BR"
+format: html
+editor: visual
+---
+
+# Differential Gene Expression Analysis with DESeq2 on the Airway Dataset
+
+We aimed to create a series of plots that could be incorporated into our educational game. To achieve this, we performed a **differential gene expression (DGE)** analysis using the *`airway`* dataset and the Bioconductor package **DESeq2**. This workflow involved data normalization and visualization through several key plots, including a **heatmap**, an **MA plot**, and a **volcano plot**.
+
+**Bioconductor** is an open-source project that provides a comprehensive collection of tools for analyzing and interpreting high-throughput genomic data, primarily within the R environment. It includes widely used packages such as **DESeq2**, **ComplexHeatmap**, and many others. In addition to analysis tools, Bioconductor offers example datasets like **`airway.`**
+
+The **`airway`** dataset contains RNA-seq gene expression profiles from human airway smooth muscle cells. These cells were either treated with **dexamethasone** (a synthetic glucocorticoid) or left untreated. This dataset is commonly used to investigate how dexamethasone influences gene expression, making it an excellent resource for educational purposes.
+
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c("airway", "DESeq2", "ComplexHeatmap", "pheatmap"))
+```
+
+We installed required Bioconductor packages: `airway`, `DESeq2`, `ComplexHeatmap`, and `pheatmap`.
+
+We loaded the required libraries for analysis:
+
+-   `DESeq2`: for differential expression analysis.
+
+-   `ComplexHeatmap`: advanced heatmap generation.
+
+-   `ggplot2`: plotting system for graphs.
+
+```{r}
+library(airway)
+library(DESeq2)
+library(ComplexHeatmap)
+library(ggplot2)
+```
+
+We stored the dataset in a variable `se` (a `SummarizedExperiment` object) and converted the `dex` column (dexamethasone treatment: "trt"/"untrt") to a factor variable.
+
+```{r}
+data("airway")
+se <- airway
+colData(se)$dex <- as.factor(colData(se)$dex)
+
+```
+
+We created a DESeq2 dataset (`dds`) with `dex` as the experimental design variable. Then we run the full DESeq2 pipeline: estimation of size factors, dispersion, and model fitting. This allows us to accurately identify genes that are differentially expressed between conditions.
+
+```{r}
+dds <- DESeqDataSet(se, design = ~ dex)
+dds <- DESeq(dds)
+```
+
+We applied VST (variance stabilizing transformation) to normalize the data. We set `blind = FALSE` which means that the transformation considers the design (treatment information).
+
+Raw RNA-seq counts have variance that depends on the mean (higher counts usually have higher variance). VST transforms the data to stabilize the variance across all expression levels, making it more suitable for visualization (like heatmaps) and downstream analyses that assume more constant variance.
+
+```{r}
+vsd <- vst(dds, blind = FALSE)
+```
+
+At the end, we use results(). This function produces a results table containing, for each gene, values such as:
+
+-   estimated log2 fold change between conditions,
+
+-   p-values and adjusted p-values (padj),
+
+-   statistical test results.
+
+This allows us to identify which genes are significantly deferentially expressed between the conditions (e.g., treated vs. untreated).
+
+```{r}
+res = results(dds)
+```
+
+## VISUALIZATION 
+
+#### MA plot to visualize differential expression results
+
+```{r}
+plotMA(res, ylim = c(-5, 5), main = "MA Plot: Differential Expression Analysis Results from Airway Dataset")
+```
+
+#### Heatmap of Top 15 Most Variable Genes (VST normalized) 
+
+```{r}
+
+# necessary libraries
+library(GenomicRanges)
+library(SummarizedExperiment)
+library(matrixStats)
+
+# We selected top 15 most variable genes and prepare heatmap data
+
+topGenes <- head(order(rowVars(assay(vsd)), decreasing = TRUE), 15) # The assay() function extracts the gene expression matrix from the vsd object (which contains RNA-seq data that has been normalized using the Variance Stabilizing Transformation, VST).
+mat <- assay(vsd)[topGenes, ] # We filtered the expression matrix to retain only the top 15 most variable genes.
+mat_scaled <- t(scale(t(mat))) # We standardized the expression data across genes (rows), so that each gene has a mean of 0 and a standard deviation of 1.
+
+Heatmap(mat_scaled,
+        name = "vst",
+        show_row_names = TRUE,
+        show_column_names = TRUE,
+        cluster_rows = TRUE,
+        cluster_columns = TRUE,
+        column_title = "Heatmap of Top 15 Most Variable Genes (VST normalized) in Airway Dataset")
+```
+
+#### Volcano Plot: Significant Genes in Differential Expression
+
+The `results()` function from DESeq2 produces an object containing information about differential expression for each gene (e.g., log2 fold change, p-value, adjusted p-value).\
+Here, we converted this result into a data frame (`res_df`) so we can manipulate and plot it easily.\
+Then, we added a column `gene` containing gene identifiers (from the row names of the result).
+
+```{r}
+
+res_df <- as.data.frame(res)
+res_df$gene <- rownames(res_df)
+
+# We set significance thresholds
+padj_thresh <- 0.05
+log2fc_thresh <- 1
+
+# We labelled genes based on significance
+res_df$significance <- "not significant"
+res_df$significance[res_df$padj < padj_thresh & abs(res_df$log2FoldChange) > log2fc_thresh] <- "significant"
+
+# Preparing a clean dataset for plotting – we removed any genes with missing (NA) values in either the adjusted p-value or the log2 fold change. Running the code without this step resulted in errors.
+res_df_clean <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ]
+
+ggplot(res_df_clean, aes(x = log2FoldChange, y = -log10(padj), color = significance)) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  scale_color_manual(values = c("gray", "red")) +
+  geom_vline(xintercept = c(-log2fc_thresh, log2fc_thresh), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(padj_thresh), linetype = "dashed", color = "black") +
+  labs(title = "Volcano Plot: Significant Genes in Differential Expression in Airway Dataset", x = "log2(FoldChange)", y = "-log10(adjusted p-value)") +
+  theme_minimal()
+```
+
+#### Boxplot of a single gene expression by condition
+
+```{r}
+vsd_mat <- assay(vsd) # We extracted the normalized gene expression matrix from the vsd object. Each row = one gene, each column = one sample.
+meta <- as.data.frame(colData(dds)) # We extracted sample metadata from the DESeq2 dataset (dds) and converts it into a regular data frame.
+
+gene_id <- "ENSG00000125691"  # An example of a gene ID from the dataset
+
+df_box <- data.frame(
+  expression = vsd_mat[gene_id, ],
+  condition = meta$dex
+)
+
+ggplot(df_box, aes(x = condition, y = expression, fill = condition)) +
+  geom_boxplot() +
+  labs(title = paste("Gene expression of", gene_id, "- across dex Conditions in Airway Dataset"),
+       x = "Condition (dex)",
+       y = "log2(expression)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+#### Barplot of average expression of selected genes
+
+```{r}
+
+
+genes <- c("ENSG00000152583", "ENSG00000111640", "ENSG00000125691", "ENSG00000131747", "ENSG00000182185")
+avg_exp <- rowMeans(vsd_mat[genes, ])
+
+gene_names <- c("SPARCL1", "GAPDH", "RPL23", "TOP2A", "RAD51B") # Gene names were verified to correspond to the selected Ensembl IDs
+
+df_bar <- data.frame(
+  gene = gene_names,
+  expression = avg_exp
+)
+
+ggplot(df_bar, aes(x = gene, y = expression, fill = gene)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(
+    "SPARCL1" = "#F8C8DC",   
+    "GAPDH" = "#A9D1F5",   
+    "RPL23" = "#D8B6E9", 
+    "TOP2A" = "#B5EAD7",
+    "RAD51B" = "#AEC6CF"      
+  )) +
+  labs(#title = "Average Expression of Selected Genes (VST normalized) in Airway Dataset",
+       x = "Gene",
+       y = "log2(expression)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
