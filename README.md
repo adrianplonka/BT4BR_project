@@ -40,4 +40,10 @@ All educational content has been written with clarity and accessibility in mind,
 ## References
 - https://bioconductor.org
 - pygame 2.6.1
+- chatGPT, help with coding e.g. opening terminal, moving objects, analysing data for plots and others
+
+## Contributions
+- code in Python and video of the game - Adrian Płonka
+- visualisation in R - Aleksandra Pacuł†
+- graphics images, descriptions and help with coding - Alicja Ulidowska
 
