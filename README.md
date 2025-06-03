@@ -30,7 +30,8 @@ All educational content has been written with clarity and accessibility in mind,
 
 ## Project Structure
 
-<pre> BT4BR_project/ ├── game.script/ # Final game builds 
+<pre> 
+├── game.script/ # Final game builds 
 │ ├── final_linux.py │ └── final_windows.py 
 ├── images/ # All custom illustrations and graphics 
 ├── other_files/ # Supplementary project files
