@@ -14,8 +14,6 @@ As players explore the environment, they encounter **key items** and **trigger z
 
 Questions have been designed with both **challenge and reinforcement** in mind. Rather than relying on rote memorization, the game encourages conceptual thinking: recognizing biological file formats, understanding algorithm outputs, and interpreting simplified datasets.
 
-To enhance learning, the project integrates a lightweight feedback system. While still under active development, the game collects data such as time spent per question and accuracy, which is analyzed via **R scripts** located in the `/analysis` directory. These scripts generate visual insights into how players interact with each topic—supporting future refinements of question difficulty and pacing.
-
 ## Visualization & analysis
 
 Although the core game is implemented in Python, a companion set of **R-based visualizations** ____________. These visualizations aim to identify patterns in response behavior, highlighting which concepts may require clearer framing or improved instructional scaffolding. _______________________
